@@ -1,36 +1,66 @@
 <!DOCTYPE html>
-
 <html>
-  
-  <head>
+    <head>
+        <title>Web Dictionary</title>
+    </head>
     
-  </head>
-  
-  <style>
-    
-  </style>
-  
-  <body>
-    <div class="title">
-      
-      <h1>Web Dictionary</h1> 
-    </div>
-    <div class="R">
-   
-   
-    <button id = "Search"> Search </button>
-    
-    
-  
- 
-    
-    
-    
-  </body>
-  
-  
-  
-  
-  
-  
+    <body>
+        <h3>_choordinator Web Dictionary</h3>
+        <p>Lookup the definition of a word. (eg. ajax, html, bar, css, etc.)</p>
+        <input type="text" id="word" />
+        <button onclick="definition(false)"> Search </button> <button onclick="definition(true)"> Get all definitions </button>
+        <hr>
+        <h4>Result:</h4>
+        <div id="result"></div>
+        
+        
+        <script>
+            function definition(searchAll){
+                var word = document.getElementById("word").value.toLowerCase();
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200){
+                        getXMLData(this, searchAll, word);
+                    }
+                };
+                request.open("GET", "request.php", true);
+                request.send();
+            }
+            
+            function getXMLData(xml, searchAll, word){
+                var xmlDoc = xml.responseXML;
+                var ls="<ol>";
+                var defs = xmlDoc.getElementsByTagName("definition");
+                var result = document.getElementById("result");
+                var found = false;
+                
+                if (searchAll){
+                    for (var i = 0; i <defs.length; i++){ 
+                        ls += "<li>" + "<h5>" + defs[i].getAttributeNode("name").value + "</h5>" + // prints the name attribute of the definition
+                        "<p>" + defs[i].childNodes[0].nodeValue + "</p>" +                             // prints the definition of the word
+                        "<p> Author - " + defs[i].getAttributeNode("author").value + "</p>" +                 // prints the name attribute of the definition
+                        "</li>";  
+                    }
+                    ls += "</ol>";
+                    result.innerHTML = ls;
+                    found = true;
+                }else{
+                    for (var i = 0; i <defs.length; i++) { 
+                        if (defs[i].getAttributeNode("name").value.toLowerCase() == word){
+                            result.innerHTML  = "<ol><li>" + "<h5>" + defs[i].getAttributeNode("name").value + "</h5>" + 
+                            "<p>" + defs[i].childNodes[0].nodeValue + "</p>" +                             
+                            "<p> Author " + defs[i].getAttributeNode("author").value + "</p>" +                 
+                            "</li></ol>";
+                            found = true;
+                            break;
+                        }
+                        
+                    }
+                }
+                if(!found){
+                    result.innerHTML = "<p>"+word+" not found ... </p>";
+                }
+            }
+        </script>
+    </body>
 </html>
